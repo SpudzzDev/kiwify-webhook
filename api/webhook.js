@@ -1,23 +1,23 @@
+let lastPayload = null; // Armazena último webhook
+
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  try {
-    const webhookData = req.body;
-
-    console.log("Recebi Webhook da Kiwify:", webhookData);
-
-    // Aqui você pode salvar no Firebase, mandar para Discord, etc.
-    
-    return res.status(200).json({ status: "ok" });
-  } catch (error) {
-    console.error("Erro no Webhook:", error);
-    return res.status(500).json({ error: "Internal server error" });
+  if (req.method === "POST") {
+    try {
+      lastPayload = req.body;
+      console.log("🔔 Webhook recebido:", req.body);
+      return res.status(200).json({ status: "ok" });
+    } catch (err) {
+      console.error("Erro:", err);
+      return res.status(500).json({ error: "Erro interno" });
+    }
+  } else if (req.method === "GET") {
+    // frontend vai chamar isso para ver o último payload
+    return res.status(200).json({ data: lastPayload });
+  } else {
+    return res.status(405).json({ error: "Método não permitido" });
   }
 }
 
-// Essa função diz para o Next.js/Serverless que o body é RAW (não parse JSON automático)
 export const config = {
   api: {
     bodyParser: true,
